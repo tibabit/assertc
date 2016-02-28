@@ -3,8 +3,9 @@
 typedef bool boolean;
 typedef char * string;
 typedef void (*function)(void);
+typedef int line;
 
-#define expect_declaration(suffix, type)        void executor_##suffix(type actual, boolean output, type expected)
+#define expect_declaration(suffix, type)        void executor_##suffix(string file, line ln, type actual, boolean output, type expected)
 
 expect_declaration(bool, boolean);
 expect_declaration(char, char);
@@ -15,10 +16,11 @@ expect_declaration(float, float);
 expect_declaration(double, double);
 expect_declaration(string, string);
 
-void executor_test  (string description, function func);
-void executor_suite (string description, function func);
+void executor_test      (string description, function func);
+void executor_suite     (string description, function func);
+void executor_pending   (string description);
 
-#define expect_call(suffix, actual)     executor_##suffix(actual,
+#define expect_call(suffix, actual)     executor_##suffix(__FILE__, __LINE__, actual,
 
 #define expect_bool(actual)             expect_call(bool, actual)
 #define expect_char(actual)             expect_call(char, actual)
@@ -32,6 +34,7 @@ void executor_suite (string description, function func);
 #define module(name)                    __attribute__((constructor)) assert_module_##name()
 #define suite(desc)                     executor_suite(desc, ({ void func()
 #define test(desc)                      executor_test(desc, ({ void func()
+#define pending(desc)                   executor_pending(desc)
 #define end                             func;}));
 
 /**
