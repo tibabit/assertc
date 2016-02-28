@@ -4,10 +4,9 @@
 
 #define EXECUTE_ASSERTIONS
 
-int main()
+module(byte)
 {
-#ifdef EXECUTE_ASSERTIONS
-    suite("Checking if assertions are working fine")
+    suite("Checking if byte assertions are working fine")
     {
         suite("bool")
         {
@@ -31,7 +30,12 @@ int main()
                 expect_char('c') to not be equal('d');
             } end
         }end
-
+    } end
+}
+module(number)
+{
+    suite("Checking if number assertions are working fine")
+    {
         suite("short")
         {
             test("Should pass if 5 == 5")
@@ -91,7 +95,13 @@ int main()
                 expect_double(10.25) to not be equal(10.20);
             } end
         } end
+    } end
+}
 
+module(string)
+{
+    suite("Checking if string assertions are working fine")
+    {
         suite("string (char *)")
         {
             test("Should pass if \"Hello\" == \"Hello\"")
@@ -103,10 +113,16 @@ int main()
                 expect_string("World") to not be equal("World");
                 expect_string("Hello") to be equal("World");
             } end
-
             pending("Test case to compare pointers");
         } end
     } end
-#endif
+}
+
+int main()
+{
+    register_module(number);
+    register_module(byte);
+    register_module(string);
+    run_all();
     return 0;
 }

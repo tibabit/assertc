@@ -3,31 +3,34 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 FILE *dev_null = NULL;
 
-#define print_description(description, type)            \
-    {                                                   \
-        string spaces = get_level_spaces();             \
-        printf(type##_LINE_GAP_BEFORE "%s"              \
-        type##_BULLET_COLOR                             \
-        type##_BULLET type##_TEXT_COLOR                 \
-        "%s" RESET_COLOR                                \
-        type##_LINE_GAP_AFTER "\n",                     \
-        spaces,                                         \
-        description);                                   \
-        free(spaces);                                   \
+#define print_description(description, type, format, ...)   \
+    {                                                       \
+        string spaces = get_level_spaces();                 \
+        printf(type##_LINE_GAP_BEFORE "%s"                  \
+        type##_BULLET_COLOR                                 \
+        type##_BULLET type##_TEXT_COLOR                     \
+        "%s" format RESET_COLOR                             \
+        type##_LINE_GAP_AFTER "\n",                         \
+        spaces,                                             \
+        description,                                        \
+        ##__VA_ARGS__);                                     \
+        free(spaces);                                       \
     }
 
-#define print_failure(failure_number, description)      \
-    {                                                   \
-        string spaces = get_level_spaces();             \
-        printf("%s" FAILURE_BULLET_COLOR                \
-        "%d) %s" RESET_COLOR "\n",                      \
-        spaces,                                         \
-        failure_number,                                 \
-        description);                                   \
-        free(spaces);                                   \
+#define print_failure(failure_number, description, format, ...) \
+    {                                                           \
+        string spaces = get_level_spaces();                     \
+        printf("%s" FAILURE_BULLET_COLOR                        \
+        "%d) %s" format RESET_COLOR "\n",                       \
+        spaces,                                                 \
+        failure_number,                                         \
+        description,                                            \
+        ##__VA_ARGS__);                                         \
+        free(spaces);                                           \
     }
 
 #define print_result_counts(count, description, type)   \
@@ -50,6 +53,10 @@ FILE *dev_null = NULL;
         ##__VA_ARGS__);                                         \
         free(spaces);                                           \
     }
+
+#define start_clock()               time_t start_time = clock()
+#define stop_clock()                time_t end_time = clock()
+#define get_elapsed_time()          (int)((double)(end_time - start_time) / CLOCKS_PER_SEC * 1000 + 0.5)
 
 #define bool_to_str(val)            (val == true ? "true" : "false")
 
@@ -80,8 +87,8 @@ FILE *dev_null = NULL;
 #define SUMMARY                     "\x1b[7m"
 #define RESET_COLOR                 "\x1b[0m"
 #define SUCCESS_BULLET_COLOR        "\x1b[32m"
-#define FAILURE_BULLET_COLOR        "\x1b[91m"
-#define PENDING_BULLET_COLOR        "\x1b[96m"
+#define FAILURE_BULLET_COLOR        "\x1b[31m"
+#define PENDING_BULLET_COLOR        "\x1b[36m"
 #define SUITE_BULLET_COLOR          "\x1b[37m"
 
 #define FAILURE_BG_COLOR            "\x1b[40m"
@@ -91,6 +98,10 @@ FILE *dev_null = NULL;
 #define FAILURE_TEXT_COLOR          ""
 #define PENDING_TEXT_COLOR          ""
 #define SUITE_TEXT_COLOR            "\x1b[1m"
+
+#define OK_TIME_COLOR               "\x1b[32m"      /* time taken is between 0 and idle / 2 */
+#define MEDIUM_TIME_COLOR           "\x1b[33m"      /* time taken is between idle /2 and idle */
+#define TOOMUCH_TIME_COLOR          "\x1b[31m"      /* time taken is greater than idle */
 
 #define SUCCESS_BULLET              "✓ "
 #define FAILURE_BULLET              "✗ "
@@ -107,6 +118,7 @@ FILE *dev_null = NULL;
 #define PENDING_LINE_GAP_AFTER      ""
 
 #define MAX_ASSERTIONS_PER_TEST     64
+#define MAX_MODULES                 1024
 
 typedef struct _Assertion
 {
@@ -122,6 +134,7 @@ typedef struct _Test
     boolean     is_pending;                             /* TRUE if test is pending for later implemention */
     Assertion * assertions[MAX_ASSERTIONS_PER_TEST];    /* assertions that belong to this test*/
     int         failed_assertion_count;                 /* number of failed assertions */
+    int         time_taken;                             /* time taken in milliseconds to finish this test*/
 }Test;
 
 Assertion *     assertion_create(string file, line ln, string error);
@@ -140,6 +153,13 @@ int g_suite_level = 0;
 int g_total_failures = 0;
 int g_total_success = 0;
 int g_total_pending = 0;
+
+/* global variables to hold module list */
+function g_module_collection[MAX_MODULES];
+int g_total_modules = 0;
+
+/* default settings */
+int g_setting_idle_time = 75;       /* maximum time which is to be considered ok for a test to execute */
 
 /* BEGIN executor definition functions */
 executor_definition(boolp,  string, strcmp(actual, expected) == 0,      "%s");
@@ -160,7 +180,7 @@ void executor_bool(string file, line ln, bool actual, boolean output, bool expec
 /* SUITE */
 void pre_executor_suite(string description)
 {
-    print_description(description, SUITE);
+    print_description(description, SUITE, "");
     g_suite_level++;
 }
 void post_executor_suite(string description)
@@ -182,9 +202,10 @@ void pre_executor_test(string description)
     g_test_collection[g_test_count - 1] = test_create(description);
 }
 
-void post_executor_test(string description)
+void post_executor_test(int time_taken)
 {
     Test * test = test_current();
+    test->time_taken = time_taken;
     if (test->is_failure)
     {
         g_total_success--;
@@ -196,8 +217,10 @@ void post_executor_test(string description)
 void executor_test(string description, function func)
 {
     pre_executor_test(description);
+    start_clock();
     func();
-    post_executor_test(description);
+    stop_clock();
+    post_executor_test(get_elapsed_time());
 }
 
 /* PENDING */
@@ -214,13 +237,34 @@ void pre_executor_pending(string description)
 void post_executor_pending(string description)
 {
     Test * test = test_current();
-    print_description(test->description, PENDING);
+    print_description(test->description, PENDING, "");
 }
 
 void executor_pending(string description)
 {
     pre_executor_pending(description);
     post_executor_pending(description);
+}
+
+/* MODULE */
+void executor_register(function func)
+{
+    g_module_collection[g_total_modules++] = func;
+}
+
+void executor_module(function func)
+{
+    func();
+}
+
+void executor_all(void)
+{
+    int i = 0;
+
+    for(i = 0; i < g_total_modules; i++)
+    {
+        g_module_collection[i]();
+    }
 }
 
 Test * test_create(string description)
@@ -230,6 +274,7 @@ Test * test_create(string description)
     test->description = strdup(description);
     test->is_failure = false;
     test->is_pending = false;
+    test->time_taken = 0;
     test->failed_assertion_count = 0;
     g_total_success++; // assume that this test will succeed, later we will decrement this if a test failes
 
@@ -264,13 +309,40 @@ void test_add_failure(Test * test, Assertion * assertion)
 void print_test_result()
 {
     Test *test = test_current();
+    string color = NULL;
+    if (test->time_taken < g_setting_idle_time / 2)
+    {
+        color = OK_TIME_COLOR;
+    }
+    else if(test->time_taken >= g_setting_idle_time / 2 && test->time_taken < g_setting_idle_time)
+    {
+        color = MEDIUM_TIME_COLOR;
+    }
+    else if (test->time_taken >= g_setting_idle_time)
+    {
+        color = TOOMUCH_TIME_COLOR;
+    }
     if (!test->is_failure)
     {
-        print_description(test->description, SUCCESS);
+        if (test->time_taken < g_setting_idle_time / 2)
+        {
+            print_description(test->description, SUCCESS, "");
+        }
+        else
+        {
+            print_description(test->description, SUCCESS, " %s(%dms)", color, test->time_taken);
+        }
     }
     else
     {
-        print_failure(g_total_failures, test->description);
+        if (test->time_taken < g_setting_idle_time / 2)
+        {
+            print_failure(g_total_failures, test->description, "");
+        }
+        else
+        {
+            print_failure(g_total_failures, test->description, " %s(%dms)", color, test->time_taken);
+        }
     }
 }
 
@@ -304,7 +376,7 @@ string get_message_template(boolean output, string format)
 {
     string template = malloc(128);
     memset(template, 0, 128);
-    sprintf(template, "Assertion Error: %sxpected < %s > but was < %s >", output ? "E" : "Not e", format, format);
+    sprintf(template, "Assertion Error: %sxpected <%s> but was <%s>", output ? "E" : "Not e", format, format);
 
     return template;
 }
@@ -329,7 +401,7 @@ __attribute__((destructor)) void after_test()
         if (test->is_failure)
         {
             overall_result = false;
-            print_failure(++failure_number, test->description);
+            print_failure(++failure_number, test->description, "");
             g_suite_level++;
             for(j = 0; j < test->failed_assertion_count; j++)
             {
