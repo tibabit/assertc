@@ -6,7 +6,7 @@ assertion and testing framework for C
 
 #### need an example?
 
-```
+```C
 suite("Test suit 1")
 {
     test("Test 1")
