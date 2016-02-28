@@ -110,8 +110,7 @@ module(string)
             } end
             test("Should pass if \"Hello\" != \"World\"")
             {
-                expect_string("World") to not be equal("World");
-                expect_string("Hello") to be equal("World");
+                expect_string("Hello") to not be equal("World");
             } end
             pending("Test case to compare pointers");
         } end

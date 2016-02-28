@@ -47,7 +47,7 @@ void executor_all       (void);
 #define not                     !
 #define to
 #define be                      true
-#define equal(expected)         , (expected))
+#define equal(expected)         , expected)
 
 #define register_module(name)           executor_register(module_name(name))
 #define run(name)                       executor_module(module_name(name))
