@@ -40,7 +40,7 @@ int main()
             } end
             test("Should pass if 5 != 6")
             {
-                expect_short(5) to be equal(6);
+                expect_short(5) to not be equal(6);
             } end
         } end
 
@@ -100,6 +100,7 @@ int main()
             } end
             test("Should pass if \"Hello\" != \"World\"")
             {
+                expect_string("World") to not be equal("World");
                 expect_string("Hello") to be equal("World");
             } end
 

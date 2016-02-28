@@ -4,53 +4,50 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define print_description(description, type)        \
-    {                                               \
-        string spaces = get_level_spaces();         \
-        printf("%s%s%s%s%s%s%s%s\n",                \
-        type##_LINE_GAP_BEFORE,                     \
-        spaces,                                     \
-        type##_BULLET_COLOR,                        \
-        type##_BULLET,                              \
-        type##_TEXT_COLOR,                          \
-        description,                                \
-        RESET_COLOR,                                \
-        type##_LINE_GAP_AFTER);                     \
-        free(spaces);                               \
+FILE *dev_null = NULL;
+
+#define print_description(description, type)            \
+    {                                                   \
+        string spaces = get_level_spaces();             \
+        printf(type##_LINE_GAP_BEFORE "%s"              \
+        type##_BULLET_COLOR                             \
+        type##_BULLET type##_TEXT_COLOR                 \
+        "%s" RESET_COLOR                                \
+        type##_LINE_GAP_AFTER "\n",                     \
+        spaces,                                         \
+        description);                                   \
+        free(spaces);                                   \
     }
 
-#define print_failure(failure_number, description)  \
-    {                                               \
-        string spaces = get_level_spaces();         \
-        printf("%s%s%d) %s%s\n",                    \
-        spaces,                                     \
-        FAILURE_BULLET_COLOR,                       \
-        failure_number,                             \
-        description,                                \
-        RESET_COLOR);                               \
-        free(spaces);                               \
+#define print_failure(failure_number, description)      \
+    {                                                   \
+        string spaces = get_level_spaces();             \
+        printf("%s" FAILURE_BULLET_COLOR                \
+        "%d) %s" RESET_COLOR "\n",                      \
+        spaces,                                         \
+        failure_number,                                 \
+        description);                                   \
+        free(spaces);                                   \
     }
 
 #define print_result_counts(count, description, type)   \
     {                                                   \
         string spaces = get_level_spaces();             \
-        printf("%s%s%s%3d %s%s\n",                      \
+        printf("%s" type##_BULLET_COLOR                 \
+        type##_BULLET "%3d %s" RESET_COLOR"\n",         \
         spaces,                                         \
-        type##_BULLET_COLOR,                            \
-        type##_BULLET,                                  \
         count,                                          \
-        description,                                    \
-        RESET_COLOR);                                   \
+        description);                                   \
         free(spaces);                                   \
     }
 
-#define print_failure_description(failure_number, description)  \
+#define print_failure_description(failure_number, format, ...)  \
     {                                                           \
         string spaces = get_level_spaces();                     \
-        printf("%s%d. %s\n",                                    \
+        printf("%s%d. " format "\n",                            \
         spaces,                                                 \
         failure_number,                                         \
-        description);                                           \
+        ##__VA_ARGS__);                                         \
         free(spaces);                                           \
     }
 
@@ -66,27 +63,38 @@
         boolean is_failure = output ? !(comparator) : (comparator);         \
         if (is_failure)                                                     \
         {                                                                   \
-            Assertion * assertion = assertion_create(file, ln, "Failed");   \
+            int message_length = 0;                                         \
+            string error;                                                   \
+            string template = get_message_template(output, format);         \
+            message_length = fprintf(dev_null, template, expected, actual); \
+            error = malloc(message_length);                                 \
+            sprintf(error, template, expected, actual);                     \
+            Assertion * assertion = assertion_create(file, ln, error);      \
             Test * test = test_current();                                   \
             test_add_failure(test, assertion);                              \
+            free(template);                                                 \
+            free(error);                                                    \
         }                                                                   \
     }
 
-#define UNDERLINE                   "\x1b[4m"
+#define SUMMARY                     "\x1b[7m"
 #define RESET_COLOR                 "\x1b[0m"
 #define SUCCESS_BULLET_COLOR        "\x1b[32m"
-#define FAILURE_BULLET_COLOR        "\x1b[31m"
-#define PENDING_BULLET_COLOR        "\x1b[36m"
+#define FAILURE_BULLET_COLOR        "\x1b[91m"
+#define PENDING_BULLET_COLOR        "\x1b[96m"
 #define SUITE_BULLET_COLOR          "\x1b[37m"
+
+#define FAILURE_BG_COLOR            "\x1b[40m"
+#define SUCCESS_BG_COLOR            "\x1b[40m"
 
 #define SUCCESS_TEXT_COLOR          "\x1b[30m"
 #define FAILURE_TEXT_COLOR          ""
 #define PENDING_TEXT_COLOR          ""
-#define SUITE_TEXT_COLOR            ""
+#define SUITE_TEXT_COLOR            "\x1b[1m"
 
 #define SUCCESS_BULLET              "✓ "
 #define FAILURE_BULLET              "✗ "
-#define PENDING_BULLET              "• "
+#define PENDING_BULLET              "! "
 #define SUITE_BULLET                ""
 
 #define SUITE_LINE_GAP_BEFORE       "\n"
@@ -123,6 +131,7 @@ void            test_add_failure(Test * test, Assertion * assertion);
 Test *          test_current();
 void            print_test_result();
 string          get_level_spaces();
+string          get_message_template(boolean output, string format);
 
 /* global variables to hold tests, and test results*/
 Test **g_test_collection;
@@ -291,6 +300,20 @@ string get_level_spaces()
     return spaces;
 }
 
+string get_message_template(boolean output, string format)
+{
+    string template = malloc(128);
+    memset(template, 0, 128);
+    sprintf(template, "Assertion Error: %sxpected < %s > but was < %s >", output ? "E" : "Not e", format, format);
+
+    return template;
+}
+
+__attribute__((constructor)) void init_test()
+{
+    dev_null = fopen("/dev/null", "w");
+}
+
 __attribute__((destructor)) void after_test()
 {
     int i = 0, j = 0;
@@ -298,7 +321,7 @@ __attribute__((destructor)) void after_test()
     boolean overall_result = true;
 
     string spaces = get_level_spaces();
-    printf("\n\n%s" UNDERLINE "SUMMARY" RESET_COLOR "\n\n", spaces);
+    printf("\n\n%s" SUMMARY " SUMMARY: " RESET_COLOR "\n\n", spaces);
 
     for(i = 0; i< g_test_count; i++)
     {
@@ -311,7 +334,7 @@ __attribute__((destructor)) void after_test()
             for(j = 0; j < test->failed_assertion_count; j++)
             {
                 Assertion * assertion = test->assertions[j];
-                print_failure_description(j + 1, assertion->error);
+                print_failure_description(j + 1, "%s, File: %s, Line: %d", assertion->error, assertion->file, assertion->ln);
             }
             g_suite_level--;
         }
@@ -319,7 +342,7 @@ __attribute__((destructor)) void after_test()
     }
     free(g_test_collection);
 
-    printf("\n\n");
+    printf("%s", overall_result == false ? "\n\n" : "");
     print_result_counts(g_total_success, "Successful", SUCCESS);
 
     if (g_total_failures > 0)
@@ -334,12 +357,14 @@ __attribute__((destructor)) void after_test()
 
     if (!overall_result)
     {
-        printf("\n%s%sTEST FAILED.%s\n\n", spaces, FAILURE_BULLET_COLOR, RESET_COLOR);
+        printf("\n%s" FAILURE_BG_COLOR FAILURE_BULLET_COLOR " FAILED " RESET_COLOR "\n", spaces);
     }
     else
     {
-        printf("\n%s%sTEST SUCCESSFUL.%s\n\n", spaces, SUCCESS_BULLET_COLOR, RESET_COLOR);
+        printf("\n%s" SUCCESS_BG_COLOR SUCCESS_BULLET_COLOR " SUCCESSFUL " RESET_COLOR "\n", spaces);
     }
 
     free(spaces);
+
+    fclose(dev_null);
 }
