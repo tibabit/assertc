@@ -4,17 +4,28 @@ typedef bool boolean;
 typedef char * string;
 typedef void (*function)(void);
 typedef int line;
+/**
+ * operators
+ */
+ typedef enum
+ {
+     operator_equal             = 0x00001,
+     operator_above             = 0x00010,
+     operator_below             = 0x00100,
+     operator_above_or_equal    = operator_above | operator_equal,
+     operator_below_or_equal    = operator_below | operator_equal
+ }operator_t;
 
-#define expect_declaration(suffix, type)        void executor_##suffix(string file, line ln, type actual, boolean output, type expected)
+#define executor_declaration(suffix, type)        void executor_##suffix(string file, line ln, type actual, boolean output, type expected, operator_t operator)
 
-expect_declaration(bool, boolean);
-expect_declaration(char, char);
-expect_declaration(short, short);
-expect_declaration(int, int);
-expect_declaration(long, long);
-expect_declaration(float, float);
-expect_declaration(double, double);
-expect_declaration(string, string);
+executor_declaration(bool, boolean);
+executor_declaration(char, char);
+executor_declaration(short, short);
+executor_declaration(int, int);
+executor_declaration(long, long);
+executor_declaration(float, float);
+executor_declaration(double, double);
+executor_declaration(string, string);
 
 void executor_test      (string description, function func);
 void executor_suite     (string description, function func);
@@ -32,8 +43,8 @@ void executor_all       (void);
 
 /**
  * syntax
-*/
-#define expect_call(suffix, actual)     executor_##suffix(__FILE__, __LINE__, actual,
+ */
+#define expect_call(suffix, actual)     executor_##suffix(__FILE__, __LINE__, actual
 
 #define expect_bool(actual)             expect_call(bool,   actual)
 #define expect_char(actual)             expect_call(char,   actual)
@@ -44,10 +55,14 @@ void executor_all       (void);
 #define expect_double(actual)           expect_call(double, actual)
 #define expect_string(actual)           expect_call(string, actual)
 
-#define not                     !
-#define to
-#define be                      true
-#define equal(expected)         , expected)
+#define not                             !
+#define to                              ,
+#define be                              true
+#define equal(expected)                 , expected, operator_equal)
+#define above(expected)                 , expected, operator_above)
+#define above_or_equal(expected)        , expected, operator_above_or_equal)
+#define below(expected)                 , expected, operator_below)
+#define below_or_equal(expected)        , expected, operator_below_or_equal)
 
 #define register_module(name)           executor_register(module_name(name))
 #define run(name)                       executor_module(module_name(name))
