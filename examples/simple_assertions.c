@@ -96,11 +96,11 @@ module(number)
     } end
 }
 
-module(string)
+module(string_t)
 {
-    suite("Checking if string assertions are working fine")
+    suite("Checking if string_t assertions are working fine")
     {
-        suite("string (char *)")
+        suite("string_t (char *)")
         {
             test("Should pass if \"Hello\" == \"Hello\"")
             {
@@ -110,7 +110,7 @@ module(string)
             {
                 expect_string("Hello") to not be equal("World");
             } end
-            pending("Test case to compare pointers");
+            pending("test_t case to compare pointers");
         } end
     } end
 }
@@ -119,7 +119,7 @@ int main()
 {
     register_module(number);
     register_module(byte);
-    register_module(string);
+    register_module(string_t);
     run_all();
     return 0;
 }

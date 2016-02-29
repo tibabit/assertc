@@ -1,9 +1,9 @@
 #include <stdbool.h>
 
-typedef bool boolean;
-typedef char * string;
-typedef void (*function)(void);
-typedef int line;
+typedef bool    bool_t;
+typedef char *  string_t;
+typedef void    (*function)(void);
+typedef int     line_t;
 /**
  * operators
  */
@@ -16,20 +16,20 @@ typedef int line;
      operator_below_or_equal    = operator_below | operator_equal
  }operator_t;
 
-#define executor_declaration(suffix, type)        void executor_##suffix(string file, line ln, type actual, boolean output, type expected, operator_t operator)
+#define executor_declaration(suffix, type)        void executor_##suffix(string_t file, line_t ln, type actual, bool_t output, type expected, operator_t operator)
 
-executor_declaration(bool, boolean);
+executor_declaration(bool, bool_t);
 executor_declaration(char, char);
 executor_declaration(short, short);
 executor_declaration(int, int);
 executor_declaration(long, long);
 executor_declaration(float, float);
 executor_declaration(double, double);
-executor_declaration(string, string);
+executor_declaration(string, string_t);
 
-void executor_test      (string description, function func);
-void executor_suite     (string description, function func);
-void executor_pending   (string description);
+void executor_test      (string_t description, function func);
+void executor_suite     (string_t description, function func);
+void executor_pending   (string_t description);
 void executor_register  (function func);
 void executor_module    (function func);
 void executor_all       (void);

@@ -9,7 +9,7 @@ FILE *dev_null = NULL;
 
 #define print_description(description, type, format, ...)   \
     {                                                       \
-        string spaces = get_level_spaces();                 \
+        string_t spaces = get_level_spaces();                 \
         printf(type##_LINE_GAP_BEFORE "%s"                  \
         type##_BULLET_COLOR                                 \
         type##_BULLET type##_TEXT_COLOR                     \
@@ -23,7 +23,7 @@ FILE *dev_null = NULL;
 
 #define print_failure(failure_number, description, format, ...) \
     {                                                           \
-        string spaces = get_level_spaces();                     \
+        string_t spaces = get_level_spaces();                     \
         printf("%s" FAILURE_BULLET_COLOR                        \
         "%d) %s" format RESET_COLOR "\n",                       \
         spaces,                                                 \
@@ -35,7 +35,7 @@ FILE *dev_null = NULL;
 
 #define print_result_counts(count, description, type)   \
     {                                                   \
-        string spaces = get_level_spaces();             \
+        string_t spaces = get_level_spaces();             \
         printf("%s" type##_BULLET_COLOR                 \
         type##_BULLET "%3d %s" RESET_COLOR"\n",         \
         spaces,                                         \
@@ -46,7 +46,7 @@ FILE *dev_null = NULL;
 
 #define print_failure_description(failure_number, format, ...)  \
     {                                                           \
-        string spaces = get_level_spaces();                     \
+        string_t spaces = get_level_spaces();                     \
         printf("%s%d. " format "\n",                            \
         spaces,                                                 \
         failure_number,                                         \
@@ -73,29 +73,29 @@ FILE *dev_null = NULL;
 #define comparator_string(actual, expected, operator)       (strcmp(actual, expected) operator 0)
 
 #define comparer(suffix, type)                                              \
-    boolean comparer_equal_##suffix(type actual, type expected)             \
+    bool_t comparer_equal_##suffix(type actual, type expected)             \
     {                                                                       \
         return comparator_##suffix(actual, expected, ==);                   \
     }                                                                       \
-    boolean comparer_above_##suffix(type actual, type expected)             \
+    bool_t comparer_above_##suffix(type actual, type expected)             \
     {                                                                       \
         return comparator_##suffix(actual, expected, >);                    \
     }                                                                       \
-    boolean comparer_above_or_equal_##suffix(type actual, type expected)    \
+    bool_t comparer_above_or_equal_##suffix(type actual, type expected)    \
     {                                                                       \
         return comparator_##suffix(actual, expected, >=);                   \
     }                                                                       \
-    boolean comparer_below_##suffix(type actual, type expected)             \
+    bool_t comparer_below_##suffix(type actual, type expected)             \
     {                                                                       \
         return comparator_##suffix(actual, expected, <);                    \
     }                                                                       \
-    boolean comparer_below_or_equal_##suffix(type actual, type expected)    \
+    bool_t comparer_below_or_equal_##suffix(type actual, type expected)    \
     {                                                                       \
         return comparator_##suffix(actual, expected, <=);                   \
     }
 
 #define executor_operator_definition(suffix, type)                                                            \
-    boolean executor_operator_##suffix(type actual, type expected, operator_t operator)                       \
+    bool_t executor_operator_##suffix(type actual, type expected, operator_t operator)                       \
     {                                                                                                       \
             return operator == operator_equal ? comparer_equal_##suffix(actual, expected)                     \
             : (operator == operator_above ? comparer_above_##suffix(actual, expected)                         \
@@ -104,40 +104,40 @@ FILE *dev_null = NULL;
             : comparer_below_or_equal_##suffix(actual, expected))));                                          \
     }
 
-comparer(boolp, string)
+comparer(boolp, string_t)
 comparer(char, char)
 comparer(short, short)
 comparer(int, int)
 comparer(long, long)
 comparer(float, float)
 comparer(double, double)
-comparer(string, string)
+comparer(string, string_t)
 
-executor_operator_definition(boolp, string)
+executor_operator_definition(boolp, string_t)
 executor_operator_definition(char, char)
 executor_operator_definition(short, short)
 executor_operator_definition(int, int)
 executor_operator_definition(long, long)
 executor_operator_definition(float, float)
 executor_operator_definition(double, double)
-executor_operator_definition(string, string)
+executor_operator_definition(string, string_t)
 
 /* test executor function */
 #define executor_definition(suffix, type, format)                                   \
-    void executor_##suffix(string file,                                             \
-        line ln,                                                                    \
+    void executor_##suffix(string_t file,                                             \
+        line_t ln,                                                                    \
         type actual,                                                                \
-        boolean output,                                                             \
+        bool_t output,                                                             \
         type expected,                                                              \
         operator_t operator)                                                        \
     {                                                                               \
-        boolean result = executor_operator_##suffix(actual, expected, operator);    \
-        boolean is_failure = output ? !(result) : (result);                         \
+        bool_t result = executor_operator_##suffix(actual, expected, operator);    \
+        bool_t is_failure = output ? !(result) : (result);                         \
         if (is_failure)                                                             \
         {                                                                           \
             int message_length = 0;                                                 \
-            string error;                                                           \
-            string template = get_message_template(output, format);                 \
+            string_t error;                                                           \
+            string_t template = get_message_template(output, format);                 \
             message_length = fprintf(dev_null, template, expected, actual);         \
             error = malloc(message_length);                                         \
             sprintf(error, template, expected, actual);                             \
@@ -187,29 +187,29 @@ executor_operator_definition(string, string)
 
 typedef struct _Assertion
 {
-    string      file;   /* name of the file where assertion failed */
-    line        ln;     /* line number at which assertion failed */
-    string      error;  /* error message to be displayed to user when this fails*/
+    string_t      file;   /* name of the file where assertion failed */
+    line_t        ln;     /* line number at which assertion failed */
+    string_t      error;  /* error message to be displayed to user when this fails*/
 }Assertion;
 
 typedef struct _Test
 {
-    string      description;                            /* description of the test as provided */
-    boolean     is_failure;                             /* TRUE if test has failed, FALSE otherwise */
-    boolean     is_pending;                             /* TRUE if test is pending for later implemention */
+    string_t      description;                            /* description of the test as provided */
+    bool_t     is_failure;                             /* TRUE if test has failed, FALSE otherwise */
+    bool_t     is_pending;                             /* TRUE if test is pending for later implemention */
     Assertion * assertions[MAX_ASSERTIONS_PER_TEST];    /* assertions that belong to this test*/
     int         failed_assertion_count;                 /* number of failed assertions */
     int         time_taken;                             /* time taken in milliseconds to finish this test*/
 }Test;
 
-Assertion *     assertion_create(string file, line ln, string error);
+Assertion *     assertion_create(string_t file, line_t ln, string_t error);
 void            assertion_destory(Assertion * assertion);
-Test *          test_create(string description);
+Test *          test_create(string_t description);
 void            test_add_failure(Test * test, Assertion * assertion);
 Test *          test_current();
 void            print_test_result();
-string          get_level_spaces();
-string          get_message_template(boolean output, string format);
+string_t          get_level_spaces();
+string_t          get_message_template(bool_t output, string_t format);
 
 /* global variables to hold tests, and test results*/
 Test **g_test_collection;
@@ -227,16 +227,16 @@ int g_total_modules = 0;
 int g_setting_idle_time = 75;       /* maximum time which is to be considered ok for a test to execute */
 
 /* BEGIN executor definition functions */
-executor_definition(boolp,  string, "%s");
+executor_definition(boolp,  string_t, "%s");
 executor_definition(char,   char,   "%c");
 executor_definition(short,  short,  "%d");
 executor_definition(int,    int,    "%d");
 executor_definition(long,   long,   "%ld");
 executor_definition(float,  float,  "%f");
 executor_definition(double, double, "%lf");
-executor_definition(string, string, "%s");
+executor_definition(string, string_t, "%s");
 
-void executor_bool(string file, line ln, boolean actual, boolean output, boolean expected, operator_t operator)
+void executor_bool(string_t file, line_t ln, bool_t actual, bool_t output, bool_t expected, operator_t operator)
 {
     //printf("%d %d %s %s\n", actual, expected, bool_to_str(actual), bool_to_str(expected));
     executor_boolp(file, ln, bool_to_str(actual), output, bool_to_str(expected), operator);
@@ -244,17 +244,17 @@ void executor_bool(string file, line ln, boolean actual, boolean output, boolean
 /* END executor definition functions */
 
 /* SUITE */
-void pre_executor_suite(string description)
+void pre_executor_suite(string_t description)
 {
     print_description(description, SUITE, "");
     g_suite_level++;
 }
-void post_executor_suite(string description)
+void post_executor_suite(string_t description)
 {
     g_suite_level--;
 }
 
-void executor_suite(string description, function func)
+void executor_suite(string_t description, function func)
 {
     pre_executor_suite(description);
     func();
@@ -262,7 +262,7 @@ void executor_suite(string description, function func)
 }
 
 /* TEST */
-void pre_executor_test(string description)
+void pre_executor_test(string_t description)
 {
     g_test_collection = (Test**)realloc(g_test_collection, sizeof(Test) * (++g_test_count));
     g_test_collection[g_test_count - 1] = test_create(description);
@@ -280,7 +280,7 @@ void post_executor_test(int time_taken)
     print_test_result();
 }
 
-void executor_test(string description, function func)
+void executor_test(string_t description, function func)
 {
     pre_executor_test(description);
     start_clock();
@@ -290,7 +290,7 @@ void executor_test(string description, function func)
 }
 
 /* PENDING */
-void pre_executor_pending(string description)
+void pre_executor_pending(string_t description)
 {
     g_test_collection = (Test**)realloc(g_test_collection, sizeof(Test) * (++g_test_count));
     Test * test = test_create(description);
@@ -300,13 +300,13 @@ void pre_executor_pending(string description)
     g_total_pending++;
 }
 
-void post_executor_pending(string description)
+void post_executor_pending(string_t description)
 {
     Test * test = test_current();
     print_description(test->description, PENDING, "");
 }
 
-void executor_pending(string description)
+void executor_pending(string_t description)
 {
     pre_executor_pending(description);
     post_executor_pending(description);
@@ -333,7 +333,7 @@ void executor_all(void)
     }
 }
 
-Test * test_create(string description)
+Test * test_create(string_t description)
 {
     int i = 0;
     Test * test = (Test *)calloc(1, sizeof(Test));
@@ -375,7 +375,7 @@ void test_add_failure(Test * test, Assertion * assertion)
 void print_test_result()
 {
     Test *test = test_current();
-    string color = NULL;
+    string_t color = NULL;
     if (test->time_taken < g_setting_idle_time / 2)
     {
         color = OK_TIME_COLOR;
@@ -412,7 +412,7 @@ void print_test_result()
     }
 }
 
-Assertion * assertion_create(string file, line ln, string error)
+Assertion * assertion_create(string_t file, line_t ln, string_t error)
 {
     Assertion * assertion = (Assertion *)calloc(1, sizeof(Assertion));
     assertion->error    = strdup(error);
@@ -427,20 +427,20 @@ void assertion_destory(Assertion * assertion)
     free(assertion);
 }
 
-string get_level_spaces()
+string_t get_level_spaces()
 {
     int num_spaces = 4/*increas 4 spaces at each level*/ * g_suite_level +
     4/*minimum spaces*/;
-    string spaces = (string)malloc(num_spaces + 1);
+    string_t spaces = (string_t)malloc(num_spaces + 1);
     memset(spaces, ' ', num_spaces);
     spaces[num_spaces - 1] = 0; // make it null terminated string
 
     return spaces;
 }
 
-string get_message_template(boolean output, string format)
+string_t get_message_template(bool_t output, string_t format)
 {
-    string template = malloc(128);
+    string_t template = malloc(128);
     memset(template, 0, 128);
     sprintf(template, "Assertion Error: %sxpected <%s> but was <%s>", output ? "E" : "Not e", format, format);
 
@@ -456,9 +456,9 @@ __attribute__((destructor)) void after_test()
 {
     int i = 0, j = 0;
     int failure_number = 0;
-    boolean overall_result = true;
+    bool_t overall_result = true;
 
-    string spaces = get_level_spaces();
+    string_t spaces = get_level_spaces();
     printf("\n\n%s" SUMMARY " SUMMARY: " RESET_COLOR "\n\n", spaces);
 
     for(i = 0; i< g_test_count; i++)
