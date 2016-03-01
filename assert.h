@@ -1,9 +1,8 @@
 #include <stdbool.h>
+#include "runner.h"
 
-typedef bool    bool_t;
-typedef char *  string_t;
 typedef void    (*function)(void);
-typedef int     line_t;
+
 /**
  * operators
  */
