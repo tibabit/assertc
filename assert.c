@@ -29,23 +29,23 @@ FILE *dev_null = NULL;
 #define comparator_string(actual, expected, operator)       (strcmp(actual, expected) operator 0)
 
 #define comparer(suffix, type)                                              \
-    bool_t comparer_equal_##suffix(type actual, type expected)             \
+    bool_t comparer_equal_##suffix(type actual, type expected)              \
     {                                                                       \
         return comparator_##suffix(actual, expected, ==);                   \
     }                                                                       \
-    bool_t comparer_above_##suffix(type actual, type expected)             \
+    bool_t comparer_above_##suffix(type actual, type expected)              \
     {                                                                       \
         return comparator_##suffix(actual, expected, >);                    \
     }                                                                       \
-    bool_t comparer_above_or_equal_##suffix(type actual, type expected)    \
+    bool_t comparer_above_or_equal_##suffix(type actual, type expected)     \
     {                                                                       \
         return comparator_##suffix(actual, expected, >=);                   \
     }                                                                       \
-    bool_t comparer_below_##suffix(type actual, type expected)             \
+    bool_t comparer_below_##suffix(type actual, type expected)              \
     {                                                                       \
         return comparator_##suffix(actual, expected, <);                    \
     }                                                                       \
-    bool_t comparer_below_or_equal_##suffix(type actual, type expected)    \
+    bool_t comparer_below_or_equal_##suffix(type actual, type expected)     \
     {                                                                       \
         return comparator_##suffix(actual, expected, <=);                   \
     }
@@ -79,37 +79,44 @@ executor_operator_definition(double, double)
 executor_operator_definition(string, string_t)
 
 /* test executor function */
-#define executor_definition(suffix, type, format)                                   \
-    void executor_##suffix(string_t file,                                             \
-        line_t ln,                                                                    \
-        type actual,                                                                \
-        bool_t output,                                                             \
-        type expected,                                                              \
-        operator_t operator)                                                        \
-    {                                                                               \
-        bool_t result = executor_operator_##suffix(actual, expected, operator);    \
-        bool_t is_failure = output ? !(result) : (result);                         \
-        if (is_failure)                                                             \
-        {                                                                           \
-            int message_length = 0;                                                 \
-            assertion_t * assertion = assertion_create(file, ln, "Failed");              \
-            test_t * test = test_current(g_test_runner);                                           \
-            test_add_failure(test, assertion);                                      \
-        }                                                                           \
+#define executor_definition(suffix, type, format)                                           \
+    void executor_##suffix(string_t file,                                                   \
+        line_t ln,                                                                          \
+        type actual,                                                                        \
+        bool_t output,                                                                      \
+        type expected,                                                                      \
+        operator_t operator)                                                                \
+    {                                                                                       \
+        bool_t result = executor_operator_##suffix(actual, expected, operator);             \
+        bool_t is_failure = output ? !(result) : (result);                                  \
+        if (is_failure)                                                                     \
+        {                                                                                   \
+            int message_length = 0;                                                         \
+            string_t template = malloc(10);                                                 \
+            string_t actual_value;                                                          \
+            string_t expected_value;                                                        \
+                                                                                            \
+            sprintf(template, "%s", format);                                                \
+                                                                                            \
+            message_length = fprintf(dev_null, template, actual);                           \
+            actual_value = malloc(message_length + 1);                                      \
+            sprintf(actual_value, template, actual);                                        \
+                                                                                            \
+            message_length = fprintf(dev_null, template, expected);                         \
+            expected_value = malloc(message_length + 1);                                    \
+            sprintf(expected_value, template, expected);                                    \
+                                                                                            \
+            assertion_t * assertion = assertion_create(file, ln, operator,                  \
+                output, actual_value, expected_value);                                      \
+            test_t * test = test_current(g_test_runner);                                    \
+            test_add_failure(test, assertion);                                              \
+                                                                                            \
+            free(actual_value);                                                             \
+            free(expected_value);                                                           \
+            free(template);                                                                 \
+        }                                                                                   \
     }
 
-    // int message_length = 0;                                                 \
-    // string_t error;                                                           \
-    // string_t template = get_message_template(output, format);                 \
-    // message_length = fprintf(dev_null, template, expected, actual);         \
-    // error = malloc(message_length);                                         \
-    // sprintf(error, template, expected, actual);                             \
-    // assertion_t * assertion = assertion_create(file, ln, error);              \
-    // test_t * test = test_current(g_test_reporter);                                           \
-    // test_add_failure(test, assertion);                                      \
-    // free(template);                                                         \
-    // free(error);                                                            \
-    //
 void print_test_result();
 
 /* global variables to hold tests, and test results*/
@@ -258,5 +265,6 @@ __attribute__((destructor)) void after_test()
 {
     fclose(dev_null);
     g_test_reporter->print_summary(g_test_runner);
-    spec_reporter_init(g_test_reporter);
+    test_runner_destroy(g_test_runner);
+    spec_reporter_destroy(g_test_reporter);
 }

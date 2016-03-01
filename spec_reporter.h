@@ -3,8 +3,7 @@
 
 #include "runner.h"
 
-string_t            get_level_spaces(int level);
-string_t            get_message_template(boolean_t output, string_t format);
 test_reporter_t *   spec_reporter_init();
+void                spec_reporter_destroy(test_reporter_t *);
 
 #endif  // SPEC_REPORTER_H_

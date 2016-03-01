@@ -83,6 +83,9 @@ void spec_print_description_pending     (test_t * test, string_t format, ...);
 void spec_print_description_failure     (test_t *test, int failure_number, string_t format, ...);
 void spec_print_summary                 (test_runner_t * runner);
 
+string_t get_level_spaces(int level);
+string_t get_message_template(boolean_t output, string_t format, operator_t operator);
+
 test_reporter_t * spec_reporter_init()
 {
     test_reporter_t * reporter = calloc(1, sizeof(test_reporter_t));
@@ -94,6 +97,11 @@ test_reporter_t * spec_reporter_init()
     reporter->print_summary                 = spec_print_summary;
 
     return reporter;
+}
+
+void spec_reporter_destroy(test_reporter_t * reporter)
+{
+    free(reporter);
 }
 
 void spec_print_description_suite(string_t description, int level, string_t format, ...)
@@ -146,10 +154,13 @@ void spec_print_summary(test_runner_t * runner)
 
     printf("\n\n%s" SUMMARY "SUMMARY:" RESET_COLOR "\n\n", spaces);
 
+    string_t template = malloc(1024);
+    string_t error = malloc(1024);
+
     for(i = 0; i< runner->test_count; i++)
     {
         test_t * test = runner->test_collection[i];
-        test->level = runner->suite_level; /* show all results at same level */ 
+        test->level = runner->suite_level; /* show all results at same level */
         if (test->is_failure)
         {
             overall_result = false;
@@ -158,11 +169,25 @@ void spec_print_summary(test_runner_t * runner)
             for(j = 0; j < test->failed_assertion_count; j++)
             {
                 assertion_t * assertion = test->assertions[j];
-                print_failure_description(j + 1, runner->suite_level, "%s, File: %s, Line: %d", assertion->error, assertion->file, assertion->ln);
+                sprintf(template, "Assertion Error: %sxpected %s <%s> but was <%s>",
+                assertion->output ? "E" : "Not e",
+                (assertion->operator == operator_equal ? "" :
+                (assertion->operator == operator_above ? "above" :
+                (assertion->operator == operator_above_or_equal ? "above or equal" :
+                (assertion->operator == operator_below ? "below" : "below or equal")))),
+                "%s", "%s");
+
+                sprintf(error, template, assertion->actual, assertion->expected);
+
+                print_failure_description(j + 1, runner->suite_level, "%s, File: %s, Line: %d", error, assertion->file, assertion->ln);
             }
             runner->suite_level--;
         }
     }
+
+    free(template);
+    free(error);
+
     printf("%s", overall_result == false ? "\n\n" : "");
     print_result_counts(runner->total_success, runner->suite_level, "Successful", SUCCESS);
 
@@ -196,13 +221,4 @@ string_t get_level_spaces(int level)
     spaces[num_spaces - 1] = 0; // make it null terminated string_t
 
     return spaces;
-}
-
-string_t get_message_template(boolean_t output, string_t format)
-{
-    string_t template = malloc(128);
-    memset(template, 0, 128);
-    sprintf(template, "assertion_t Error: %sxpected <%s> but was <%s>", output ? "E" : "Not e", format, format);
-
-    return template;
 }

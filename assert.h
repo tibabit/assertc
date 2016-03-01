@@ -3,18 +3,6 @@
 
 typedef void    (*function)(void);
 
-/**
- * operators
- */
- typedef enum
- {
-     operator_equal             = 0x00001,
-     operator_above             = 0x00010,
-     operator_below             = 0x00100,
-     operator_above_or_equal    = operator_above | operator_equal,
-     operator_below_or_equal    = operator_below | operator_equal
- }operator_t;
-
 #define executor_declaration(suffix, type)        void executor_##suffix(string_t file, line_t ln, type actual, bool_t output, type expected, operator_t operator)
 
 executor_declaration(bool, bool_t);

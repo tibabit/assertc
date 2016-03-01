@@ -43,17 +43,37 @@ void test_add_failure(test_t * test, assertion_t * assertion)
 }
 
 
-assertion_t * assertion_create(string_t file, line_t ln, string_t error)
+assertion_t * assertion_create(string_t file,
+    line_t line,
+    operator_t operator,
+    bool_t output,
+    string_t actual,
+    string_t expected)
 {
     assertion_t * assertion = (assertion_t *)calloc(1, sizeof(assertion_t));
-    assertion->error    = strdup(error);
+    assertion->actual   = strdup(actual);
+    assertion->expected = strdup(expected);
     assertion->file     = strdup(file);
-    assertion->ln       = ln;
+    assertion->ln       = line;
+    assertion->operator = operator;
+    assertion->output   = output;
 }
 
 void assertion_destory(assertion_t * assertion)
 {
     free(assertion->file);
-    free(assertion->error);
+    free(assertion->actual);
+    free(assertion->expected);
     free(assertion);
+}
+
+void test_runner_destroy(test_runner_t *runner)
+{
+    int i = 0;
+    for(i = 0; i < runner->test_count; i++)
+    {
+        test_destroy(runner->test_collection[i]);
+    }
+    free(runner->test_collection);
+    free(runner);
 }
