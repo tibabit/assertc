@@ -1,18 +1,41 @@
-#include <stdbool.h>
+#include <stddef.h>
 #include "runner.h"
 
 typedef void    (*function)(void);
 
-#define executor_declaration(suffix, type)        void executor_##suffix(string_t file, line_t ln, type actual, bool_t output, type expected, operator_t operator)
+/* Begin Definitions */
 
-executor_declaration(bool, bool_t);
-executor_declaration(char, char);
-executor_declaration(short, short);
-executor_declaration(int, int);
-executor_declaration(long, long);
-executor_declaration(float, float);
-executor_declaration(double, double);
-executor_declaration(string, string_t);
+/* Primitive types */
+#define executor_declaration_primitive(suffix, type)    \
+    void executor_##suffix(string_t file,               \
+        line_t line,                                    \
+        type actual,                                    \
+        bool_t output,                                  \
+        type expected,                                  \
+        operator_t operator)
+
+executor_declaration_primitive(bool, bool_t);
+executor_declaration_primitive(char, char);
+executor_declaration_primitive(short, short);
+executor_declaration_primitive(int, int);
+executor_declaration_primitive(long, long);
+executor_declaration_primitive(float, float);
+executor_declaration_primitive(double, double);
+executor_declaration_primitive(string, string_t);
+
+/* array */
+#define executor_declaration_array(suffix, type)        \
+    void executor_array_##suffix(string_t file,         \
+        line_t line,                                    \
+        type * actual,                                  \
+        size_t actual_len,                              \
+        bool_t output,                                  \
+        type * expected,                                \
+        operator_t operator)
+
+executor_declaration_array(int, int);
+
+/* End Definitions */
 
 void executor_test      (string_t description, function func);
 void executor_suite     (string_t description, function func);
@@ -28,19 +51,26 @@ void executor_all       (void);
 #define pending(desc)                   executor_pending(desc)
 #define end                             func;}));
 
-/**
- * syntax
- */
-#define expect_call(suffix, actual)     executor_##suffix(__FILE__, __LINE__, actual
+/* Begin syntax Definitions */
 
-#define expect_bool(actual)             expect_call(bool,   actual)
-#define expect_char(actual)             expect_call(char,   actual)
-#define expect_short(actual)            expect_call(short,  actual)
-#define expect_int(actual)              expect_call(int,    actual)
-#define expect_long(actual)             expect_call(long,   actual)
-#define expect_float(actual)            expect_call(float,  actual)
-#define expect_double(actual)           expect_call(double, actual)
-#define expect_string(actual)           expect_call(string, actual)
+/* Primitive types */
+/* =============== */
+#define expect_call_primitive(suffix, actual)     executor_##suffix(__FILE__, __LINE__, actual
+
+#define expect_bool(actual)             expect_call_primitive(bool,   actual)
+#define expect_char(actual)             expect_call_primitive(char,   actual)
+#define expect_short(actual)            expect_call_primitive(short,  actual)
+#define expect_int(actual)              expect_call_primitive(int,    actual)
+#define expect_long(actual)             expect_call_primitive(long,   actual)
+#define expect_float(actual)            expect_call_primitive(float,  actual)
+#define expect_double(actual)           expect_call_primitive(double, actual)
+#define expect_string(actual)           expect_call_primitive(string, actual)
+
+/* Array types */
+/* =============== */
+#define expect_call_array(suffix, actual, len)      executor_array_##suffix(__FILE__, __LINE__, actual, len
+
+#define expect_array_int(actual, len)               expect_call_array(int, actual, len)
 
 #define not                             !
 #define to                              ,
@@ -54,3 +84,5 @@ void executor_all       (void);
 #define register_module(name)           executor_register(module_name(name))
 #define run(name)                       executor_module(module_name(name))
 #define run_all()                       executor_all()
+
+/* End syntax Definitions */

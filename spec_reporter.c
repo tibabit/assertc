@@ -177,7 +177,7 @@ void spec_print_summary(test_runner_t * runner)
                 (assertion->operator == operator_below ? "below" : "below or equal")))),
                 "%s", "%s");
 
-                sprintf(error, template, assertion->actual, assertion->expected);
+                sprintf(error, template, assertion->expected, assertion->actual);
 
                 print_failure_description(j + 1, runner->suite_level, "%s, File: %s, Line: %d", error, assertion->file, assertion->ln);
             }

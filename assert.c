@@ -50,14 +50,14 @@ FILE *dev_null = NULL;
         return comparator_##suffix(actual, expected, <=);                   \
     }
 
-#define executor_operator_definition(suffix, type)                                                            \
-    bool_t executor_operator_##suffix(type actual, type expected, operator_t operator)                       \
+#define executor_operator_definition(suffix, type)                                                          \
+    bool_t executor_operator_##suffix(type actual, type expected, operator_t operator)                      \
     {                                                                                                       \
-            return operator == operator_equal ? comparer_equal_##suffix(actual, expected)                     \
-            : (operator == operator_above ? comparer_above_##suffix(actual, expected)                         \
-            : (operator == operator_above_or_equal ? comparer_above_or_equal_##suffix(actual, expected)       \
-            : (operator == operator_below ? comparer_below_##suffix(actual, expected)                         \
-            : comparer_below_or_equal_##suffix(actual, expected))));                                          \
+            return operator == operator_equal ? comparer_equal_##suffix(actual, expected)                   \
+            : (operator == operator_above ? comparer_above_##suffix(actual, expected)                       \
+            : (operator == operator_above_or_equal ? comparer_above_or_equal_##suffix(actual, expected)     \
+            : (operator == operator_below ? comparer_below_##suffix(actual, expected)                       \
+            : comparer_below_or_equal_##suffix(actual, expected))));                                        \
     }
 
 comparer(boolp, string_t)
@@ -78,8 +78,8 @@ executor_operator_definition(float, float)
 executor_operator_definition(double, double)
 executor_operator_definition(string, string_t)
 
-/* test executor function */
-#define executor_definition(suffix, type, format)                                           \
+/* test executor function for primitive types  */
+#define executor_definition_primitive(suffix, type, format)                                 \
     void executor_##suffix(string_t file,                                                   \
         line_t ln,                                                                          \
         type actual,                                                                        \
@@ -117,35 +117,92 @@ executor_operator_definition(string, string_t)
         }                                                                                   \
     }
 
-void print_test_result();
+/* test executor function for array types  */
+#define executor_definition_array(suffix, type, format)                                         \
+    void executor_array_##suffix(string_t file,                                                 \
+        line_t ln,                                                                              \
+        type * actual,                                                                          \
+        size_t actual_len,                                                                      \
+        bool_t output,                                                                          \
+        type * expected,                                                                        \
+        operator_t operator)                                                                    \
+    {                                                                                           \
+        size_t i = 0;                                                                           \
+        while(i < actual_len)                                                                   \
+        {                                                                                       \
+            bool_t result = executor_operator_##suffix(actual[i], expected[i], operator);       \
+            bool_t is_failure = output ? !(result) : (result);                                  \
+            if (is_failure)                                                                     \
+            {                                                                                   \
+                int message_length = 0;                                                         \
+                string_t template = malloc(10);                                                 \
+                string_t actual_value;                                                          \
+                string_t expected_value;                                                        \
+                                                                                                \
+                sprintf(template, "%s at position %s", format, "%d");                           \
+                                                                                                \
+                message_length = fprintf(dev_null, template, actual[i], i);                     \
+                actual_value = malloc(message_length + 1);                                      \
+                sprintf(actual_value, template, actual[i], i);                                  \
+                                                                                                \
+                message_length = fprintf(dev_null, template, expected[i], i);                   \
+                expected_value = malloc(message_length + 1);                                    \
+                sprintf(expected_value, template, expected[i], i);                              \
+                                                                                                \
+                assertion_t * assertion = assertion_create(file, ln, operator,                  \
+                    output, actual_value, expected_value);                                      \
+                test_t * test = test_current(g_test_runner);                                    \
+                test_add_failure(test, assertion);                                              \
+                                                                                                \
+                free(actual_value);                                                             \
+                free(expected_value);                                                           \
+                free(template);                                                                 \
+                break; /* stop if a check failes*/                                              \
+            }                                                                                   \
+            i++;                                                                                \
+        }                                                                                       \
+    }
 
-/* global variables to hold tests, and test results*/
+
+/* >>>>>>>>>>>>>>>> BEGIN: global variables  <<<<<<<<<<<<<<<< */
+
 test_runner_t *g_test_runner;
 test_reporter_t *g_test_reporter;
-
-/* global variables to hold module list */
 function g_module_collection[MAX_MODULES];
 int g_total_modules = 0;
 
-/* default settings */
+/* >>>>>>>>>>>>>>>> END: global variables  <<<<<<<<<<<<<<<< */
+
+/* >>>>>>>>>>>>>>>> BEGIN: helper function declarations  <<<<<<<<<<<<<<<< */
+
+void print_test_result();
+
+/* >>>>>>>>>>>>>>>> END: helper function declarations  <<<<<<<<<<<<<<<< */
+
+ /* >>>>>>>>>>>>>>>> BEGIN: default settings <<<<<<<<<<<<<<<< */
+
 int g_setting_idle_time = 75;       /* maximum time which is to be considered ok for a test to execute */
 
-/* BEGIN executor definition functions */
-executor_definition(boolp,  string_t, "%s");
-executor_definition(char,   char,   "%c");
-executor_definition(short,  short,  "%d");
-executor_definition(int,    int,    "%d");
-executor_definition(long,   long,   "%ld");
-executor_definition(float,  float,  "%f");
-executor_definition(double, double, "%lf");
-executor_definition(string, string_t, "%s");
+/* >>>>>>>>>>>>>>>> END: default settings <<<<<<<<<<<<<<<< */
+
+/* >>>>>>>>>>>>>>>> BEGIN: executor definition functions <<<<<<<<<<<<<<<< */
+
+executor_definition_primitive(boolp,  string_t, "%s");
+executor_definition_primitive(char,   char,   "%c");
+executor_definition_primitive(short,  short,  "%d");
+executor_definition_primitive(int,    int,    "%d");
+executor_definition_primitive(long,   long,   "%ld");
+executor_definition_primitive(float,  float,  "%f");
+executor_definition_primitive(double, double, "%lf");
+executor_definition_primitive(string, string_t, "%s");
 
 void executor_bool(string_t file, line_t ln, bool_t actual, bool_t output, bool_t expected, operator_t operator)
 {
-    //printf("%d %d %s %s\n", actual, expected, bool_to_str(actual), bool_to_str(expected));
     executor_boolp(file, ln, bool_to_str(actual), output, bool_to_str(expected), operator);
 }
-/* END executor definition functions */
+
+executor_definition_array(int,    int,    "%d");
+/* >>>>>>>>>>>>>>>> END: executor definition functions <<<<<<<<<<<<<<<< */
 
 /* SUITE */
 void pre_executor_suite(string_t description)
@@ -263,8 +320,9 @@ __attribute__((constructor)) void init_test()
 
 __attribute__((destructor)) void after_test()
 {
-    fclose(dev_null);
     g_test_reporter->print_summary(g_test_runner);
+
+    fclose(dev_null);
     test_runner_destroy(g_test_runner);
     spec_reporter_destroy(g_test_reporter);
 }
