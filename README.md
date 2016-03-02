@@ -4,6 +4,8 @@ assertion and testing framework for C
 - easy to use
 - simple syntax
 
+### follow [Trello board](https://trello.com/b/tlrct2bU/assert)
+
 #### need an example?
 
 ```C
