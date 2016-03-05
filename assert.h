@@ -33,7 +33,14 @@ executor_declaration_primitive(string, string_t);
         type * expected,                                \
         operator_t operator)
 
+executor_declaration_array(bool, bool_t);
+executor_declaration_array(char, char);
+executor_declaration_array(short, short);
 executor_declaration_array(int, int);
+executor_declaration_array(long, long);
+executor_declaration_array(float, float);
+executor_declaration_array(double, double);
+executor_declaration_array(string, string_t);
 
 /* End Definitions */
 
@@ -70,7 +77,14 @@ void executor_all       (void);
 /* =============== */
 #define expect_call_array(suffix, actual, len)      executor_array_##suffix(__FILE__, __LINE__, actual, len
 
+#define expect_array_bool(actual, len)              expect_call_array(bool, actual, len)
+#define expect_array_char(actual, len)              expect_call_array(char, actual, len)
+#define expect_array_short(actual, len)             expect_call_array(short, actual, len)
 #define expect_array_int(actual, len)               expect_call_array(int, actual, len)
+#define expect_array_long(actual, len)              expect_call_array(long, actual, len)
+#define expect_array_float(actual, len)             expect_call_array(float, actual, len)
+#define expect_array_double(actual, len)            expect_call_array(double, actual, len)
+#define expect_array_string(actual, len)            expect_call_array(string, actual, len)
 
 #define not                             !
 #define to                              ,

@@ -96,7 +96,7 @@ module(number)
     } end
 }
 
-module(string_t)
+module(string)
 {
     suite("Checking if string_t assertions are working fine")
     {
@@ -113,13 +113,4 @@ module(string_t)
             pending("test_t case to compare pointers");
         } end
     } end
-}
-
-int main()
-{
-    register_module(number);
-    register_module(byte);
-    register_module(string_t);
-    run_all();
-    return 0;
 }

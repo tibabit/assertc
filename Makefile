@@ -5,7 +5,7 @@ all:assert.c runner.c spec_reporter.c main.c
 	@${CC} $^ -o assert
 	@echo Done.
 
-test:assert.c runner.c spec_reporter.c
+test:assert.c runner.c spec_reporter.c examples/*.c
 	@echo Building test...
-	@${CC} $^ -o $@
+	@${CC} -I./ $^ -o $@
 	@echo Done.

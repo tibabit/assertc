@@ -84,8 +84,3 @@ module(above)
         } end
     } end
 }
-int main()
-{
-    run(above);
-    return 0;
-}

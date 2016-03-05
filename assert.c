@@ -19,7 +19,7 @@ FILE *dev_null = NULL;
 
 /* COMPARISON FUNCTIONS */
 #define comparator(actual, expected, operator)              (actual operator expected)
-#define comparator_boolp(actual, expected, operator)        (strcmp(actual, expected) operator 0); //comparator(actual, expected, operator)
+#define comparator_bool(actual, expected, operator)         comparator(actual, expected, operator)
 #define comparator_char(actual, expected, operator)         comparator(actual, expected, operator)
 #define comparator_short(actual, expected, operator)        comparator(actual, expected, operator)
 #define comparator_int(actual, expected, operator)          comparator(actual, expected, operator)
@@ -60,7 +60,7 @@ FILE *dev_null = NULL;
             : comparer_below_or_equal_##suffix(actual, expected))));                                        \
     }
 
-comparer(boolp, string_t)
+comparer(bool, bool_t)
 comparer(char, char)
 comparer(short, short)
 comparer(int, int)
@@ -69,7 +69,7 @@ comparer(float, float)
 comparer(double, double)
 comparer(string, string_t)
 
-executor_operator_definition(boolp, string_t)
+executor_operator_definition(bool, bool_t)
 executor_operator_definition(char, char)
 executor_operator_definition(short, short)
 executor_operator_definition(int, int)
@@ -187,21 +187,24 @@ int g_setting_idle_time = 75;       /* maximum time which is to be considered ok
 
 /* >>>>>>>>>>>>>>>> BEGIN: executor definition functions <<<<<<<<<<<<<<<< */
 
-executor_definition_primitive(boolp,  string_t, "%s");
-executor_definition_primitive(char,   char,   "%c");
-executor_definition_primitive(short,  short,  "%d");
-executor_definition_primitive(int,    int,    "%d");
-executor_definition_primitive(long,   long,   "%ld");
-executor_definition_primitive(float,  float,  "%f");
-executor_definition_primitive(double, double, "%lf");
-executor_definition_primitive(string, string_t, "%s");
+executor_definition_primitive(bool,     bool_t,     "%d");
+executor_definition_primitive(char,     char,       "%c");
+executor_definition_primitive(short,    short,      "%d");
+executor_definition_primitive(int,      int,        "%d");
+executor_definition_primitive(long,     long,       "%ld");
+executor_definition_primitive(float,    float,      "%f");
+executor_definition_primitive(double,   double,     "%lf");
+executor_definition_primitive(string,   string_t,   "%s");
 
-void executor_bool(string_t file, line_t ln, bool_t actual, bool_t output, bool_t expected, operator_t operator)
-{
-    executor_boolp(file, ln, bool_to_str(actual), output, bool_to_str(expected), operator);
-}
+executor_definition_array(bool,     bool_t,     "%d");
+executor_definition_array(char,     char,       "%c");
+executor_definition_array(short,    short,      "%d");
+executor_definition_array(int,      int,        "%d");
+executor_definition_array(long,     long,       "%ld");
+executor_definition_array(float,    float,      "%f");
+executor_definition_array(double,   double,     "%lf");
+executor_definition_array(string,   string_t,   "%s");
 
-executor_definition_array(int,    int,    "%d");
 /* >>>>>>>>>>>>>>>> END: executor definition functions <<<<<<<<<<<<<<<< */
 
 /* SUITE */
