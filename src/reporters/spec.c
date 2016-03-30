@@ -1,4 +1,4 @@
-#include "spec_reporter.h"
+#include "spec.h"
 
 #include <stdio.h>
 #include <stdarg.h>

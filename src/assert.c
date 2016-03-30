@@ -6,7 +6,7 @@
 #include <time.h>
 
 #include "runner.h"
-#include "spec_reporter.h"
+#include "reporters/spec.h"
 
 FILE *dev_null = NULL;
 
