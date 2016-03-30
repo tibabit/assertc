@@ -1,1 +1,245 @@
-Assert C
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Assertc : assertion and testing framework for C">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Assertc</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/tibabit/assertc">View on GitHub</a>
+
+          <h1 id="project_title">Assertc</h1>
+          <h2 id="project_tagline">assertion and testing framework for C</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/tibabit/assertc/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/tibabit/assertc/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="assert" class="anchor" href="#assert" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>assert</h1>
+
+<p>assertion and testing framework for C</p>
+
+<ul>
+<li>easy to use</li>
+<li>simple syntax</li>
+</ul>
+
+<h3>
+<a id="follow-trello-board" class="anchor" href="#follow-trello-board" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>follow <a href="https://trello.com/b/tlrct2bU/assert">Trello board</a>
+</h3>
+
+<h4>
+<a id="need-an-example" class="anchor" href="#need-an-example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>need an example?</h4>
+
+<div class="highlight highlight-source-c"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>stdio.h<span class="pl-pds">&gt;</span></span>
+#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>assert.h<span class="pl-pds">"</span></span>
+
+<span class="pl-en">module</span>(byte)
+{
+    <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>Checking if byte assertions are working fine<span class="pl-pds">"</span></span>)
+    {
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>bool<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if true == true<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_bool</span>(<span class="pl-c1">true</span>) to be <span class="pl-smi">equal</span>(<span class="pl-c1">true</span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if true != false<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_bool</span>(<span class="pl-c1">false</span>) to not be <span class="pl-smi">equal</span>(<span class="pl-c1">true</span>);
+            } end
+        } end
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>char<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 'c' == 'c'<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_char</span>(<span class="pl-s"><span class="pl-pds">'</span>c<span class="pl-pds">'</span></span>) to be <span class="pl-smi">equal</span>(<span class="pl-s"><span class="pl-pds">'</span>c<span class="pl-pds">'</span></span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 'c' != 'd'<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_char</span>(<span class="pl-s"><span class="pl-pds">'</span>c<span class="pl-pds">'</span></span>) to not be <span class="pl-smi">equal</span>(<span class="pl-s"><span class="pl-pds">'</span>d<span class="pl-pds">'</span></span>);
+            } end
+        }end
+    } end
+}
+<span class="pl-en">module</span>(number)
+{
+    <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>Checking if number assertions are working fine<span class="pl-pds">"</span></span>)
+    {
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>short<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 5 == 5<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_short</span>(<span class="pl-c1">5</span>) to be <span class="pl-smi">equal</span>(<span class="pl-c1">5</span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 5 != 6<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_short</span>(<span class="pl-c1">5</span>) to not be <span class="pl-smi">equal</span>(<span class="pl-c1">6</span>);
+            } end
+        } end
+
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>int<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 10 == 10<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_int</span>(<span class="pl-c1">10</span>) to be <span class="pl-smi">equal</span>(<span class="pl-c1">10</span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 10 != 11<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_int</span>(<span class="pl-c1">10</span>) to not be <span class="pl-smi">equal</span>(<span class="pl-c1">11</span>);
+            } end
+        } end
+
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>long<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 100L == 100L<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_long</span>(<span class="pl-c1">100L</span>) to be <span class="pl-smi">equal</span>(<span class="pl-c1">100L</span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 100L != 101L<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_long</span>(<span class="pl-c1">100L</span>) to not be <span class="pl-smi">equal</span>(<span class="pl-c1">101L</span>);
+            } end
+        } end
+
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>float<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 10.02 == 10.02<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_float</span>(<span class="pl-c1">10.02</span>) to be <span class="pl-smi">equal</span>(<span class="pl-c1">10.02</span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 10.02 != 10.03<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_float</span>(<span class="pl-c1">10.02</span>) to not be <span class="pl-smi">equal</span>(<span class="pl-c1">10.03</span>);
+            } end
+        } end
+
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>double<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 10.25 == 10.25<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_double</span>(<span class="pl-c1">10.25</span>) to be <span class="pl-smi">equal</span>(<span class="pl-c1">10.25</span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if 10.25 != 10.20<span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_double</span>(<span class="pl-c1">10.25</span>) to not be <span class="pl-smi">equal</span>(<span class="pl-c1">10.20</span>);
+            } end
+        } end
+    } end
+}
+
+<span class="pl-en">module</span>(string)
+{
+    <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>Checking if string assertions are working fine<span class="pl-pds">"</span></span>)
+    {
+        <span class="pl-c1">suite</span>(<span class="pl-s"><span class="pl-pds">"</span>string (char *)<span class="pl-pds">"</span></span>)
+        {
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if <span class="pl-cce">\"</span>Hello<span class="pl-cce">\"</span> == <span class="pl-cce">\"</span>Hello<span class="pl-cce">\"</span><span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_string</span>(<span class="pl-s"><span class="pl-pds">"</span>Hello<span class="pl-pds">"</span></span>) to be <span class="pl-smi">equal</span>(<span class="pl-s"><span class="pl-pds">"</span>Hello<span class="pl-pds">"</span></span>);
+            } end
+            <span class="pl-c1">test</span>(<span class="pl-s"><span class="pl-pds">"</span>Should pass if <span class="pl-cce">\"</span>Hello<span class="pl-cce">\"</span> != <span class="pl-cce">\"</span>World<span class="pl-cce">\"</span><span class="pl-pds">"</span></span>)
+            {
+                <span class="pl-c1">expect_string</span>(<span class="pl-s"><span class="pl-pds">"</span>Hello<span class="pl-pds">"</span></span>) to not be <span class="pl-smi">equal</span>(<span class="pl-s"><span class="pl-pds">"</span>World<span class="pl-pds">"</span></span>);
+            } end
+            <span class="pl-c1">pending</span>(<span class="pl-s"><span class="pl-pds">"</span>Test case to compare pointers<span class="pl-pds">"</span></span>);
+        } end
+    } end
+}
+
+<span class="pl-k">int</span> <span class="pl-en">main</span>()
+{
+    <span class="pl-c1">register_module</span>(number);
+    <span class="pl-c1">register_module</span>(byte);
+    <span class="pl-c1">register_module</span>(string);
+    <span class="pl-c1">run_all</span>();
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
+
+<h4>
+<a id="output" class="anchor" href="#output" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>output</h4>
+
+<pre><code>Checking if number assertions are working fine
+
+    short
+        ✓ Should pass if 5 == 5
+        ✓ Should pass if 5 != 6
+
+    int
+        ✓ Should pass if 10 == 10
+        ✓ Should pass if 10 != 11
+
+    long
+        ✓ Should pass if 100L == 100L
+        ✓ Should pass if 100L != 101L
+
+    float
+        ✓ Should pass if 10.02 == 10.02
+        ✓ Should pass if 10.02 != 10.03
+
+    double
+        ✓ Should pass if 10.25 == 10.25
+        ✓ Should pass if 10.25 != 10.20
+
+Checking if byte assertions are working fine
+
+    bool
+        ✓ Should pass if true == true
+        ✓ Should pass if true != false
+
+    char
+        ✓ Should pass if 'c' == 'c'
+        ✓ Should pass if 'c' != 'd'
+
+Checking if string assertions are working fine
+
+    string (char *)
+        ✓ Should pass if "Hello" == "Hello"
+        ✓ Should pass if "Hello" != "World"
+        ! Test case to compare pointers
+
+
+ SUMMARY:
+
+✓  16 Successful
+!   1 Pending
+
+
+ SUCCESSFUL
+</code></pre>
+
+<p>just started working on it</p>
+
+<p>feel free to suggest, fork, add new features</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Assertc maintained by <a href="https://github.com/tibabit">tibabit</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
