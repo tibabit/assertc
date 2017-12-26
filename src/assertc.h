@@ -22,6 +22,7 @@ executor_declaration_primitive(long, long);
 executor_declaration_primitive(float, float);
 executor_declaration_primitive(double, double);
 executor_declaration_primitive(string, string_t);
+executor_declaration_primitive(ptr, void*);
 
 /* array */
 #define executor_declaration_array(suffix, type)        \
@@ -41,6 +42,7 @@ executor_declaration_array(long, long);
 executor_declaration_array(float, float);
 executor_declaration_array(double, double);
 executor_declaration_array(string, string_t);
+executor_declaration_array(ptr, void*);
 
 /* End Definitions */
 
@@ -72,6 +74,7 @@ void executor_all       (void);
 #define expect_float(actual)            expect_call_primitive(float,  actual)
 #define expect_double(actual)           expect_call_primitive(double, actual)
 #define expect_string(actual)           expect_call_primitive(string, actual)
+#define expect_ptr(actual)              expect_call_primitive(ptr,    actual)
 
 /* Array types */
 /* =============== */
@@ -85,6 +88,7 @@ void executor_all       (void);
 #define expect_array_float(actual, len)             expect_call_array(float, actual, len)
 #define expect_array_double(actual, len)            expect_call_array(double, actual, len)
 #define expect_array_string(actual, len)            expect_call_array(string, actual, len)
+#define expect_array_ptr(actual, len)               expect_call_array(ptr, actual, len)
 
 #define not                             !
 #define to                              ,

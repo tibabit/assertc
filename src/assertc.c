@@ -27,6 +27,7 @@ FILE *dev_null = NULL;
 #define comparator_float(actual, expected, operator)        comparator(actual, expected, operator)
 #define comparator_double(actual, expected, operator)       comparator(actual, expected, operator)
 #define comparator_string(actual, expected, operator)       (strcmp(actual, expected) operator 0)
+#define comparator_ptr(actual, expected, operator)          comparator(actual, expected, operator)
 
 #define comparer(suffix, type)                                              \
     bool_t comparer_equal_##suffix(type actual, type expected)              \
@@ -68,6 +69,7 @@ comparer(long, long)
 comparer(float, float)
 comparer(double, double)
 comparer(string, string_t)
+comparer(ptr, void*)
 
 executor_operator_definition(bool, bool_t)
 executor_operator_definition(char, char)
@@ -77,6 +79,7 @@ executor_operator_definition(long, long)
 executor_operator_definition(float, float)
 executor_operator_definition(double, double)
 executor_operator_definition(string, string_t)
+executor_operator_definition(ptr, void*)
 
 /* test executor function for primitive types  */
 #define executor_definition_primitive(suffix, type, format)                                 \
@@ -195,6 +198,7 @@ executor_definition_primitive(long,     long,       "%ld");
 executor_definition_primitive(float,    float,      "%f");
 executor_definition_primitive(double,   double,     "%lf");
 executor_definition_primitive(string,   string_t,   "%s");
+executor_definition_primitive(ptr,      void*,      "%X");
 
 executor_definition_array(bool,     bool_t,     "%d");
 executor_definition_array(char,     char,       "%c");
@@ -204,6 +208,7 @@ executor_definition_array(long,     long,       "%ld");
 executor_definition_array(float,    float,      "%f");
 executor_definition_array(double,   double,     "%lf");
 executor_definition_array(string,   string_t,   "%s");
+executor_definition_array(ptr,      void*,      "%X");
 
 /* >>>>>>>>>>>>>>>> END: executor definition functions <<<<<<<<<<<<<<<< */
 
